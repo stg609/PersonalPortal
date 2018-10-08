@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Identity.API
@@ -15,10 +10,13 @@ namespace Identity.API
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMvc();//我们需要这个 middleware 来处理 login 之类的页面
+
             services.AddIdentityServer()
                 .AddDeveloperSigningCredential()
                 .AddInMemoryApiResources(Config.GetApiResources())
-                .AddInMemoryClients(Config.GetClients());
+                .AddInMemoryClients(Config.GetClients())
+                .AddTestUsers(Config.GetTestUsers());
 
             services.AddCors(options =>
             {
@@ -38,12 +36,13 @@ namespace Identity.API
                 app.UseDeveloperExceptionPage();
             }
 
-            //app.Run(async (context) =>
-            //{
-            //    await context.Response.WriteAsync("Hello World!");
-            //});
             app.UseCors("CorsPolicy");
+
+            app.UseStaticFiles();
             app.UseIdentityServer();
+
+            //使用 MVC 这个 middleware 来处理 login 之类的页面
+            app.UseMvcWithDefaultRoute();
         }
     }
 }

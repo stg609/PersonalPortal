@@ -44,17 +44,17 @@ namespace Post.API
                     Description = "The Post Service Http API"
                 });
 
-                c.AddSecurityDefinition("oauth2", new OAuth2Scheme
+            c.AddSecurityDefinition("oauth2", new OAuth2Scheme
+            {
+                Type = "oauth2",
+                Flow = "implicit", 
+                AuthorizationUrl = $"{Configuration.GetValue<string>("IdentityUrl")}/connect/authorize",
+                TokenUrl = $"{Configuration.GetValue<string>("IdentityUrl")}/connect/token",
+                Scopes = new Dictionary<string, string>()
                 {
-                    Type = "oauth2",
-                    Flow = "application",
-                    AuthorizationUrl = $"{Configuration.GetValue<string>("IdentityUrl")}/connect/authorize",
-                    TokenUrl = $"{Configuration.GetValue<string>("IdentityUrl")}/connect/token",
-                    Scopes = new Dictionary<string, string>()
-                    {
-                        { "post", "Post API" }
-                    }
-                });
+                    { "post", "Post API" }
+                }
+            });
 
                 c.OperationFilter<AuthorizeCheckOperationFilter>();
 
@@ -62,8 +62,6 @@ namespace Post.API
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
-
-
             });
 
             // prevent from mapping "sub" claim to nameidentifier.
