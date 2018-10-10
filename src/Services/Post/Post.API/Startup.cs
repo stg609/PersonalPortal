@@ -4,19 +4,18 @@ using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
+using Consul;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.PlatformAbstractions;
+
 using Post.Infrastructure;
+
 using Swashbuckle.AspNetCore.Swagger;
+using BuildingBlocks.Services;
 
 namespace Post.API
 {
@@ -44,17 +43,17 @@ namespace Post.API
                     Description = "The Post Service Http API"
                 });
 
-            c.AddSecurityDefinition("oauth2", new OAuth2Scheme
-            {
-                Type = "oauth2",
-                Flow = "implicit", 
-                AuthorizationUrl = $"{Configuration.GetValue<string>("IdentityUrl")}/connect/authorize",
-                TokenUrl = $"{Configuration.GetValue<string>("IdentityUrl")}/connect/token",
-                Scopes = new Dictionary<string, string>()
+                c.AddSecurityDefinition("oauth2", new OAuth2Scheme
+                {
+                    Type = "oauth2",
+                    Flow = "implicit",
+                    AuthorizationUrl = $"{Configuration.GetValue<string>("IdentityUrl")}/connect/authorize",
+                    TokenUrl = $"{Configuration.GetValue<string>("IdentityUrl")}/connect/token",
+                    Scopes = new Dictionary<string, string>()
                 {
                     { "post", "Post API" }
                 }
-            });
+                });
 
                 c.OperationFilter<AuthorizeCheckOperationFilter>();
 
@@ -78,7 +77,7 @@ namespace Post.API
                 options.RequireHttpsMetadata = false;
                 options.Audience = "post";
             });
-
+            
             //services.AddCors(options =>
             //{
             //    options.AddPolicy("CorsPolicy",
@@ -90,8 +89,20 @@ namespace Post.API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IApplicationLifetime appLifeTime)
         {
+            int configuredPort = Convert.ToInt32(Configuration.GetValue<string>("urls").Split(":").Last());
+            string host = "localhost";
+
+            app.RegisterToConsul(new ServerOptions
+            {
+                 Name = Configuration.GetValue<string>("Name"),
+                 Host = host,
+                 Port = configuredPort,
+                 HealthCheckUrl = $"http://{host}:{configuredPort}/api/HealthCheck",
+                 Tags = new[] { "Tag for Consul agent" }
+            }, Configuration["ConsulConfig:Address"], appLifeTime);
+
             var pathBase = Configuration["PathBase"];
             if (!string.IsNullOrEmpty(pathBase))
             {
@@ -125,7 +136,7 @@ namespace Post.API
             //app.UseCors("CorsPolicy");
             app.UseHttpsRedirection();
 
-            app.UseAuthentication();
+            //app.UseAuthentication();
             app.UseMvc();
         }
     }

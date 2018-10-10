@@ -7,6 +7,9 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Post.Infrastructure
 {
+    /// <summary>
+    /// 供 swagger 验证的时候过滤需要授权的 operation
+    /// </summary>
     public class AuthorizeCheckOperationFilter : IOperationFilter
     {
         public void Apply(Operation operation, OperationFilterContext context)
@@ -22,9 +25,9 @@ namespace Post.Infrastructure
 
                 operation.Security = new List<IDictionary<string, IEnumerable<string>>>();
                 operation.Security.Add(new Dictionary<string, IEnumerable<string>>
-            {
-                { "oauth2", new[]{ "post"} }
-            });
+                {
+                    { "oauth2", new[]{ "post"} }
+                });
             }
         }
     }

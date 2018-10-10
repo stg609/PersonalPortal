@@ -1,17 +1,24 @@
 {
   "ReRoutes": [
     {
-      "DownstreamPathTemplate": "/{everything}",
+      "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5001
-        }
-      ],
-      "UpstreamPathTemplate": "/post/{everything}",
-      "UpstreamHttpMethod": [ "POST", "PUT", "GET" ]
+      "ServiceName": "PostService",
+      "LoadBalancer": "LeastConnection",
+      "UseServiceDiscovery": true,
+      "UpstreamPathTemplate": "/post/api/{everything}",
+      "UpstreamHttpMethod": [ "POST", "PUT", "GET" ],
+      //"AuthenticationOptions": {
+      //  "AuthenticationProviderKey": "IdentityApiKey",
+      //  "AllowedScopes": []
+      //}
     }
   ],
-  "GlobalConfiguration": {}
+  "GlobalConfiguration": {
+    "ServiceDiscoveryProvider": {
+      "Host": "localhost",
+      "Port": 8500,
+      "Type": "Consul"
+    }
+  }
 }

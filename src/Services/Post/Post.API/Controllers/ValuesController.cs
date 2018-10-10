@@ -10,7 +10,7 @@ namespace Post.API.Controllers
     /// <summary>
     /// Test Controller
     /// </summary>
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ValuesController : ControllerBase
