@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ocelot-kubernetes
+  labels:
+    app: ocelot-kuberentes-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+     app: ocelot-kuberentes-pod
+  template:
+    metadata:
+      labels:
+        app: ocelot-kuberentes-pod
+    spec:
+      containers:
+      - name: ocelot-kubernetes-containers
+        image: "ocelotapigw:latest"
+        imagePullPolicy: IfNotPresent #针对 Docker for windows，只能用 IfNotPresent，否则会提示 Pull Access deny 的错误
+        ports:
+        - containerPort: 80
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: ocelot-service
+spec:
+  selector:
+    app: ocelot-kuberentes-pod
+  ports:
+    - protocol: TCP
+      port: 80 
+  type: NodePort

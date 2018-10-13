@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,18 @@ namespace Post.API.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
-            return new string[] { "value1", "value2" };
+            //模拟操作
+            Thread.Sleep(3000);
+            return new string[]
+            {
+                Environment.GetEnvironmentVariable("POD_IP"),
+                Environment.MachineName,
+                HttpContext.TraceIdentifier,
+                HttpContext.Request.Host.Host,
+                HttpContext.Connection.LocalIpAddress.ToString(),
+                HttpContext.Connection.LocalPort.ToString(),
+                HttpContext.Connection.RemoteIpAddress.ToString()
+            };
         }
 
         // GET api/values/5

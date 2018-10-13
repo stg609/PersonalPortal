@@ -1,0 +1,48 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: postapi-kubernetes
+  labels:
+    app: postapi-kuberentes-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+     app: postapi-kuberentes-pod
+  template:
+    metadata:
+      labels:
+        app: postapi-kuberentes-pod
+    spec:
+      containers:
+      - name: postapi-kubernetes-containers
+        image: "postapi:latest"
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 5001
+        env:
+        - name: POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "kubernetes"
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+
+---
+#apiVersion: v1
+#kind: Service
+#metadata: 
+#  name: postapi-service
+#spec:
+#  clusterIP: None
+#  selector:
+#    app: postapi-kuberentes-pod
+#  ports:
+#    - protocol: TCP
+#      port: 5001 

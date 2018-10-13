@@ -24,13 +24,13 @@ namespace BuildingBlocks.Services
 
             var registration = new AgentServiceRegistration()
             {
-                //必须唯一
+                //ID必须唯一
                 ID = Guid.NewGuid().ToString(),
                 Name = serverOptions.Name,
-                Address = serverOptions.Host, //当前这个 service 的host
+                Address = serverOptions.Host, //当前这个 service 的host, 不能带 scheme
                 Port = serverOptions.Port, //当前这个 service 的端口
                 Tags = serverOptions.Tags,
-                Check = httpCheck
+                Check = httpCheck 
             };
 
             //对应用程序的开始结束进行挂钩
