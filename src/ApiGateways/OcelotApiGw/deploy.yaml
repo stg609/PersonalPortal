@@ -20,12 +20,31 @@ spec:
         imagePullPolicy: IfNotPresent #针对 Docker for windows，只能用 IfNotPresent，否则会提示 Pull Access deny 的错误
         ports:
         - containerPort: 80
+        volumeMounts:
+          - name: ocelotconfig
+            mountPath: /app/configuration/ #这种方式会覆盖 /app/configuration 目录下的所有文件，如果本身就是应该覆盖，那OK
+          - name: appsettings
+            mountPath: /app/appsettings.json #而我们这里只要覆盖 appsettings.json，而非整个 /app 目录，所以要加上具体的文件名后缀，如：/app/[文件名]
+            subPath: appsetings.json #同时用 subPath 告知这个就是我们的文件 https://github.com/kubernetes/kubernetes/issues/44815#issuecomment-297077509
         resources:
           limits:
             memory: 200Mi
           requests:
             cpu: 100m
             memory: 200Mi
+      volumes:
+        - name: ocelotconfig
+          configMap:
+            name: ocelot-config-v1
+            items:
+            - key: configuration.json
+              path: configuration.json
+        - name: appsettings
+          configMap:
+            name: ocelot-appsettings-v1
+            items:
+            - key: appsettings.json
+              path: appsettings.json
 ---
 apiVersion: v1
 kind: Service
